@@ -21,9 +21,12 @@ int main(void)
             cin >> q2;
             if (q1 == 2)
             {
+                cin >> q2;
+                cout << mp[]
             }
             else
             {
+                cin >> q2;
             }
         }
     }
