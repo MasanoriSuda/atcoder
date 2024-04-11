@@ -1,79 +1,97 @@
 #include <iostream>
-#include <algorithm>
 #include <vector>
+#include <algorithm>
+#include <queue>
+#include <list>
 #include <climits>
 
 using namespace std;
+static const int MAX = 100000;
+static const int INF = (1 << 29);
 
-static const int MAX = 100;
-static const long long INF = (1ll << 32);
+vector<int> G[MAX];
+list<int> out;
+bool V[MAX];
+int N;
+int indeg[MAX];
 
-int n;
-long long d[MAX][MAX];
-
-void floyd()
+void bfs(int s)
 {
-    for (int k = 0; k < n; ++k)
-    { // 経由する頂点
-        for (int i = 0; i < n; ++i)
-        { // 開始する頂点
-            for (int j = 0; j < n; ++j)
-            { // 終了する頂点
-                d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+
+    queue<int> q;
+    q.push(s);
+    V[s] = true;
+
+    while (!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+        out.push_back(u);
+        // cout << "u" << u << endl;
+        // cout << G[u][0] << endl;
+        // cout << V[5] << endl;
+        for (int i = 0; i < G[u].size(); ++i)
+        {
+            // cout << "hoge" << G[s][i] << endl;
+            int v = G[u][i];
+            indeg[v]--;
+            // cout << "hoge" << G[s][i] << "," << V[v] << "," << indeg[v] << endl;
+            if (indeg[v] == 0 && !V[v])
+            {
+                q.push(v);
+                V[v] = true;
             }
         }
     }
 }
 
-int main(void)
+void tsort()
 {
-    int e, u, v, c;
-    int t;
-    cin >> n >> e;
-
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < N; ++i)
     {
-        for (int j = 0; j < n; ++j)
+        indeg[i] = 0;
+    }
+
+    for (int u = 0; u < N; ++u)
+    {
+        for (int v = 0; v < G[u].size(); ++v)
         {
-            d[i][j] = i == j ? 0 : INF;
+            int i = G[u][v];
+            indeg[i]++;
         }
     }
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < N; ++i)
     {
-        cin >> u >> v >> c;
-        d[u][v] = c;
-    }
-
-    floyd();
-
-    bool negative = false;
-
-    for (int i = 0; i < n; ++i)
-    {
-        if (d[i][i] < 0)
+        if (indeg[i] == 0 && !V[i])
         {
-            negative = true;
+            bfs(i);
         }
     }
-    if (negative)
+
+    for (list<int>::iterator it = out.begin(); it != out.end(); it++)
     {
-        cout << "NEGATIVE CYCLE" << endl;
+        cout << *it << endl;
     }
-    else
+}
+
+int main()
+{
+    int s, t, M;
+    cin >> N >> M;
+
+    for (int i = 0; i < N; ++i)
     {
-        for (int i = 0; i < n; ++i)
-        {
-            for (int j = 0; j < n; ++j)
-            {
-                if (j)
-                    cout << " ";
-                if (d[i][j] == INF)
-                    cout << "INF";
-                else
-                    cout << d[i][j];
-            }
-            cout << endl;
-        }
+        V[i] = false;
     }
+
+    for (int i = 0; i < M; ++i)
+    {
+        cin >> s >> t;
+        G[s].push_back(t);
+    }
+
+    tsort();
+
+    return 0;
 }
